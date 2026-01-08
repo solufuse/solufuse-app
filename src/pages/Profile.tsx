@@ -1,22 +1,21 @@
 
-import { User } from 'firebase/auth';
+import { useAuthContext } from '../context/AuthContext';
 
-interface ProfileProps {
-  user: User | null;
-}
+const Profile = () => {
+  const { user } = useAuthContext();
 
-const Profile = ({ user }: ProfileProps) => {
+  if (!user) {
+    return <div>You must be logged in to view this page.</div>;
+  }
+
   return (
-    <div className="space-y-8">
-        <header>
-            <h1 className="text-3xl font-bold">Profile</h1>
-            <p className="text-slate-500 dark:text-slate-400">Manage your personal information.</p>
-        </header>
-        <div className="card p-6">
-            <h2 className="font-bold text-lg mb-4">Your Details</h2>
-            <p><strong>Name:</strong> {user?.displayName || "Not set"}</p>
-            <p><strong>Email:</strong> {user?.email || "Not set"}</p>
-        </div>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold">Profile</h1>
+      <div className="mt-4">
+        <img src={user.photoURL || ''} alt="User" className="w-24 h-24 rounded-full" />
+        <h2 className="text-xl font-bold mt-4">{user.displayName}</h2>
+        <p className="text-text-secondary">{user.email}</p>
+      </div>
     </div>
   );
 };

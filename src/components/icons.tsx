@@ -18,6 +18,9 @@ import {
     BarChart2,
     Zap,
     Loader2,
+    Shield,
+    ArrowRight,
+    Check,
     type LucideProps
 } from 'lucide-react';
 
@@ -40,4 +43,7 @@ export const Icons = {
     Server: (props: LucideProps) => <Zap className="icon" {...props} />,
     API: (props: LucideProps) => <BarChart2 className="icon" {...props} />,
     Loader: (props: LucideProps) => <Loader2 className="icon" {...props} />,
+    Shield: (props: LucideProps) => <Shield className="icon" {...props} />,
+    ArrowRight: (props: LucideProps) => <ArrowRight className="icon" {...props} />,
+    Check: (props: LucideProps) => <Check className="icon" {...props} />,
 };
