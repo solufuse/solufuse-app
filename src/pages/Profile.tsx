@@ -1,5 +1,11 @@
 
-const Profile = ({ user }) => {
+import { User } from 'firebase/auth';
+
+interface ProfileProps {
+  user: User | null;
+}
+
+const Profile = ({ user }: ProfileProps) => {
   return (
     <div className="space-y-8">
         <header>

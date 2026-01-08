@@ -1,7 +1,12 @@
 
 import { Sun, Moon, Bell, User, ChevronDown } from 'lucide-react';
 
-const Header = ({ theme, toggleTheme }) => {
+interface HeaderProps {
+  theme: string;
+  toggleTheme: () => void;
+}
+
+const Header = ({ theme, toggleTheme }: HeaderProps) => {
   return (
     <header className="flex items-center justify-between h-14 px-4 border-b bg-card">
       <div className="flex items-center space-x-4">

@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase'; // [FIX] On importe l'instance déjà initialisée
-import { Icons } from '../icons';
+import { Icons } from '../components/icons';
 
 interface AuthContextType {
   user: User | null;

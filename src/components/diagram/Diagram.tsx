@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -7,6 +7,9 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
+  Connection,
+  Edge,
+  BackgroundVariant,
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
@@ -18,16 +21,16 @@ const initialNodes = [
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
 function Diagram() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
+    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges],
   );
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div className="absolute inset-0">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -37,7 +40,7 @@ function Diagram() {
       >
         <Controls />
         <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
+        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
     </div>
   );

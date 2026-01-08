@@ -1,5 +1,11 @@
 
-const Config = ({ user }) => {
+import { User } from 'firebase/auth';
+
+interface ConfigProps {
+  user: User;
+}
+
+const Config = ({ user }: ConfigProps) => {
   return (
     <div className="space-y-8">
       <header>

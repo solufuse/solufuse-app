@@ -1,7 +1,12 @@
 
 import { Icons } from '../icons';
+import { User } from 'firebase/auth';
 
-const FileManager = ({ user }) => {
+interface FileManagerProps {
+  user: User;
+}
+
+const FileManager = ({ user }: FileManagerProps) => {
   return (
     <div className="card p-6">
       <h2 className="font-bold text-lg mb-4 flex items-center">

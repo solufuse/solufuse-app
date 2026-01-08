@@ -1,7 +1,14 @@
 
 import { Icons } from '../components/icons';
+import React from 'react';
 
-const StatCard = ({ title, value, icon }) => (
+interface StatCardProps {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+}
+
+const StatCard = ({ title, value, icon }: StatCardProps) => (
   <div className="card p-6 flex items-center justify-between">
     <div>
       <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>

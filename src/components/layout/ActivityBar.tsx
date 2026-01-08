@@ -1,7 +1,12 @@
 
 import { FileCode, Layout, Settings, Code, GitBranch, Search } from 'lucide-react';
+import React from 'react';
 
-const ActivityBar = ({ setActivePanel }) => {
+interface ActivityBarProps {
+  setActivePanel: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const ActivityBar = ({ setActivePanel }: ActivityBarProps) => {
   return (
     <nav className="flex flex-col items-center space-y-2 p-2 bg-card border-r">
       <button onClick={() => setActivePanel('explorer')} className="p-3 rounded-lg hover:bg-secondary">

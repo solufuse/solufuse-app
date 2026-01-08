@@ -1,8 +1,16 @@
 
 import { NavLink } from 'react-router-dom';
 import { Icons } from './icons';
+import { User } from 'firebase/auth';
+import React from 'react';
 
-const NavItem = ({ to, icon, children }) => (
+interface NavItemProps {
+  to: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const NavItem = ({ to, icon, children }: NavItemProps) => (
   <NavLink 
     to={to} 
     className={({ isActive }) => 
@@ -14,7 +22,17 @@ const NavItem = ({ to, icon, children }) => (
   </NavLink>
 );
 
-const Sidebar = ({ user, onLogout, isDarkMode, toggleTheme, onToggleFileManager, isSidebarExpanded, setIsSidebarExpanded }) => {
+interface SidebarProps {
+  user: User;
+  onLogout: () => void;
+  isDarkMode: boolean;
+  toggleTheme: () => void;
+  onToggleFileManager: () => void;
+  isSidebarExpanded: boolean;
+  setIsSidebarExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Sidebar = ({ user, onLogout, isDarkMode, toggleTheme, onToggleFileManager, isSidebarExpanded, setIsSidebarExpanded }: SidebarProps) => {
   return (
     <div className={`sidebar flex flex-col p-3 transition-all duration-300 ${isSidebarExpanded ? 'w-64' : 'w-20'}`}>
       <div className="flex items-center justify-between mb-6">
