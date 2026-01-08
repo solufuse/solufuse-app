@@ -18,4 +18,3 @@ export const useAuth = () => {
 
   return { loginWithGoogle, logout };
 };
-

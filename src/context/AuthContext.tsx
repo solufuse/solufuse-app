@@ -1,6 +1,6 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, onAuthStateChanged } from 'firebase/auth';
+import { User, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import { auth } from '../firebase';
 
 interface AuthContextType {
@@ -16,8 +16,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
+      if (currentUser) {
+        setUser(currentUser);
+        setLoading(false);
+      } else {
+        signInAnonymously(auth).then(() => {
+          setLoading(false);
+        }).catch(error => {
+          console.error("Anonymous sign-in failed", error);
+          setLoading(false);
+        });
+      }
     });
     return () => unsubscribe();
   }, []);
