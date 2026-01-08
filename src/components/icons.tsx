@@ -1,0 +1,40 @@
+
+import { 
+    Home, 
+    LayoutDashboard, 
+    Settings, 
+    UserCircle, 
+    LogOut, 
+    Sun, 
+    Moon, 
+    File, 
+    Folder, 
+    ChevronLeft, 
+    ChevronRight, 
+    FileArchive, 
+    Github,
+    Rocket,
+    Users,
+    BarChart2,
+    Zap
+} from 'lucide-react';
+
+export const Icons = {
+    Home: () => <Home className="icon" />,
+    Dashboard: () => <LayoutDashboard className="icon" />,
+    Settings: () => <Settings className="icon" />,
+    Profile: () => <UserCircle className="icon" />,
+    Logout: () => <LogOut className="icon" />,
+    Sun: () => <Sun className="icon" />,
+    Moon: () => <Moon className="icon" />,
+    File: () => <File className="icon" />,
+    Folder: () => <Folder className="icon" />,
+    ChevronLeft: () => <ChevronLeft className="icon" />,
+    ChevronRight: () => <ChevronRight className="icon" />,
+    Archive: () => <FileArchive className="icon" />,
+    GitHub: () => <Github className="icon" />,
+    Projects: () => <Rocket className="icon" />,
+    Users: () => <Users className="icon" />,
+    Server: () => <Zap className="icon" />,
+    API: () => <BarChart2 className="icon" />,
+};

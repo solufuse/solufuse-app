@@ -5,9 +5,25 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class', // [!] THIS IS THE FIX
+  darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        background: 'var(--background-light)',
+        text: 'var(--text-light)',
+        primary: 'var(--primary-color)',
+        border: 'var(--border-light)',
+        card: 'var(--card-light)',
+        sidebar: 'var(--sidebar-light)',
+        dark: {
+          background: 'var(--background-dark)',
+          text: 'var(--text-dark)',
+          border: 'var(--border-dark)',
+          card: 'var(--card-dark)',
+          sidebar: 'var(--sidebar-dark)',
+        }
+      }
+    },
   },
   plugins: [],
 }
