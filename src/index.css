@@ -1,90 +1,89 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background-light: #f7f9fc;
-  --background-dark: #16181d;
-  --text-light: #1f2937;
-  --text-dark: #e5e7eb;
-  --primary-color: #3b82f6;
-  --border-light: #e5e7eb;
-  --border-dark: #374151;
-  --card-light: #ffffff;
-  --card-dark: #1f2937;
-  --sidebar-light: #f1f5f9;
-  --sidebar-dark: #1f2937;
-}
-
-html, body {
-  height: 100%;
-  width: 100%;
-  overflow: hidden; 
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-}
-
-body {
-  @apply bg-background text-text;
-  font-size: 14px;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
-@layer components {
-  .btn {
-    @apply font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-opacity-75 transition-all duration-200 shadow-sm;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
   }
-  .btn-primary {
-    @apply btn bg-primary text-white hover:bg-blue-600 focus:ring-blue-400;
-  }
-  .btn-secondary {
-    @apply btn bg-slate-200 text-slate-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 focus:ring-slate-400;
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 216 34% 65%;
   }
 }
 
-@layer utilities {
-  .card {
-    @apply bg-card border border-border rounded-xl shadow-md;
+@layer base {
+  * {
+    @apply border-border;
   }
-
-  .sidebar {
-    @apply bg-sidebar;
-  }
-
-  .input-field {
-    @apply w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary;
-  }
-
-  .icon {
-    @apply h-5 w-5;
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-/* Global Smooth Transition */
-*, ::before, ::after {
-   transition-property: background-color, border-color, color, fill, stroke;
-   transition-duration: 200ms;
-   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+.btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
 }
+
+.btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+}
+
+.card {
+  @apply bg-card text-card-foreground border rounded-lg shadow-sm;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+}
+
+.main-content {
+  overflow: auto;
+}
+
+

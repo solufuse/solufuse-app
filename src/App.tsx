@@ -1,91 +1,82 @@
 
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
-import Sidebar from './components/Sidebar';
-import Dashboard from './pages/Dashboard';
-import Config from './pages/Config';
-import DiagramEditor from './pages/DiagramEditor';
 import Login from './pages/Login';
-import Profile from './pages/Profile'; 
-import FileManager from './components/files/FileManager';
-import { ReactFlowProvider } from 'reactflow';
-import { X } from 'lucide-react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import Header from './components/layout/Header';
+import ActivityBar from './components/layout/ActivityBar';
+import Explorer from './components/layout/Explorer';
+import Diagram from './components/diagram/Diagram';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
-export default function App() {
-  const [user, setUser] = useState<any>(null);
+const SearchPanel = () => <div className="p-4 bg-card h-full"><h2 className="font-bold text-lg">Search</h2></div>;
+const SourceControlPanel = () => <div className="p-4 bg-card h-full"><h2 className="font-bold text-lg">Source Control</h2></div>;
+
+function App() {
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-  const [isFileManagerOpen, setIsFileManagerOpen] = useState(false);
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  const [theme, setTheme] = useState('dark');
+  const [activePanel, setActivePanel] = useState('explorer');
 
   useEffect(() => {
-    document.documentElement.className = theme;
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        signInAnonymously(auth).catch((error) => {
-          console.error("Anonymous sign-in failed:", error);
-          setUser(null);
-        });
-      }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    document.body.className = theme;
+  }, [theme]);
+
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
+  const renderActivePanel = () => {
+    switch (activePanel) {
+      case 'explorer':
+        return <Explorer />;
+      case 'search':
+        return <SearchPanel />;
+      case 'version':
+        return <SourceControlPanel />;
+      default:
+        return <div className="p-4 bg-card h-full"><h2 className="font-bold text-lg">Panel</h2></div>; // Default panel
+    }
+  };
+
   if (loading) {
-    return <div className="flex items-center justify-center h-screen w-full">Loading...</div>;
+    return <div>Loading...</div>;
   }
 
   return (
-    <BrowserRouter>
-      <div className={`flex h-screen w-full font-sans`}>
-        {user && (
-          <Sidebar 
-            user={user} 
-            onLogout={() => auth.signOut()} 
-            isDarkMode={theme === 'dark'} 
-            toggleTheme={toggleTheme} 
-            onToggleFileManager={() => setIsFileManagerOpen(!isFileManagerOpen)}
-            isFileManagerOpen={isFileManagerOpen}
-            isSidebarExpanded={isSidebarExpanded}
-            setIsSidebarExpanded={setIsSidebarExpanded}
-          />
-        )}
-        
-        <main className="flex-1 overflow-y-auto w-full p-4 md:p-6 lg:p-8">
-          <Routes>
-            <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-            <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" />} />
-            <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/login" />} />
-            <Route path="/config" element={user ? <Config user={user} /> : <Navigate to="/login" />} />
-            <Route path="/diagram" element={user ? <ReactFlowProvider><DiagramEditor user={user} /></ReactFlowProvider> : <Navigate to="/login" />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </main>
-
-        {isFileManagerOpen && user && (
-          <div className="absolute inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center">
-            <div className="card w-[95%] h-[95%] flex flex-col overflow-hidden relative">
-              <button onClick={() => setIsFileManagerOpen(false)} className="absolute top-3 right-3 z-10 btn-secondary p-2 rounded-full">
-                <X size={20} />
-              </button>
-              <FileManager user={user} />
-            </div>
+    <Router>
+      {user ? (
+        <div className={`app-shell ${theme}`}>
+          <Header theme={theme} toggleTheme={toggleTheme} />
+          <div className="main-layout">
+            <ActivityBar setActivePanel={setActivePanel} />
+            <PanelGroup direction="horizontal" className="flex-grow">
+              <Panel defaultSize={20} minSize={10} collapsible={true} className="w-64 border-r bg-card">
+                {renderActivePanel()}
+              </Panel>
+              <PanelResizeHandle className="w-1 bg-border hover:bg-primary transition-colors" />
+              <Panel defaultSize={80} minSize={20}>
+                <main className="main-content h-full">
+                  <Diagram />
+                </main>
+              </Panel>
+            </PanelGroup>
           </div>
-        )}
-      </div>
-    </BrowserRouter>
+        </div>
+      ) : (
+        <Login />
+      )}
+    </Router>
   );
 }
+
+export default App;
