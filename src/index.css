@@ -57,6 +57,18 @@
   body, #root {
     @apply bg-background text-foreground h-full;
   }
+
+  .text-detail {
+    @apply text-[11px] font-bold;
+  }
+
+  .text-label {
+    @apply text-[10px] font-bold;
+  }
+  
+  .text-sublabel {
+    @apply text-[9px] font-bold;
+  }
 }
 
 .btn-primary {
