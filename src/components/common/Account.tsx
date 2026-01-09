@@ -75,7 +75,7 @@ const Account = ({ user, onLogout, onGoogleLogin }: AccountProps) => {
           </div>
           <div className="p-1 border-t border-slate-50 dark:border-[#333]">
             <button onClick={() => { onLogout(); setShowMenu(false); }} className="w-full flex items-center gap-2 px-2 py-2 text-[11px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors">
-              <Icons.LogOut className="w-3.5 h-3.5" />
+              <Icons.Logout className="w-3.5 h-3.5" />
               {user.isAnonymous ? "Exit Guest Mode" : "Sign Out"}
             </button>
           </div>
