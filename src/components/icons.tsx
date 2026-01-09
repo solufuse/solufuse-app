@@ -21,6 +21,11 @@ import {
     Shield,
     ArrowRight,
     Check,
+    FileText,
+    Search,
+    User,
+    ChevronDown,
+    LogIn,
     type LucideProps
 } from 'lucide-react';
 
@@ -46,4 +51,9 @@ export const Icons = {
     Shield: (props: LucideProps) => <Shield className="icon" {...props} />,
     ArrowRight: (props: LucideProps) => <ArrowRight className="icon" {...props} />,
     Check: (props: LucideProps) => <Check className="icon" {...props} />,
+    FileText: (props: LucideProps) => <FileText className="icon" {...props} />,
+    Search: (props: LucideProps) => <Search className="icon" {...props} />,
+    User: (props: LucideProps) => <User className="icon" {...props} />,
+    ChevronDown: (props: LucideProps) => <ChevronDown className="icon" {...props} />,
+    LogIn: (props: LucideProps) => <LogIn className="icon" {...props} />
 };
