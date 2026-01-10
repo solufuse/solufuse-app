@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useProjectContext } from '../../context/ProjectContext';
-import { listFiles, renameItem, deleteItems, downloadItems } from '../../api/files';
+import { listFiles, renameItem, deleteItems, downloadItems, createFile, createFolder } from '../../api/files';
 import { FileInfo } from '../../types';
 import { Icons } from '../icons';
 import { ContextMenu, MenuItem } from '../common/ContextMenu';
@@ -14,37 +14,58 @@ interface FileTreeNode extends FileInfo {
 }
 
 function buildFileTree(files: FileInfo[]): FileTreeNode[] {
-  const fileMap: { [path: string]: FileTreeNode } = {};
+    const root = { children: [] };
+    const nodeMap: { [path: string]: any } = { '': root };
 
-  files.forEach(file => {
-    fileMap[file.path] = { ...file, children: [], type: 'file' };
-  });
+    files.forEach(file => {
+        const parts = file.path.split('/');
+        let currentPath = '';
+        for (let i = 0; i < parts.length - 1; i++) {
+            const part = parts[i];
+            const parentPath = currentPath;
+            currentPath = currentPath ? `${currentPath}/${part}` : part;
 
-  const rootNodes: FileTreeNode[] = [];
-
-  Object.values(fileMap).forEach(node => {
-    const parentPath = node.path.substring(0, node.path.lastIndexOf('/'));
-    
-    if (parentPath && fileMap[parentPath]) {
-      const parent = fileMap[parentPath];
-      parent.type = 'directory'; 
-      parent.children.push(node);
-    } else {
-      rootNodes.push(node);
-    }
-  });
-
-  const sortNodes = (nodes: FileTreeNode[]) => {
-    nodes.sort((a, b) => {
-        if (a.type === b.type) return a.filename.localeCompare(b.filename);
-        return a.type === 'directory' ? -1 : 1;
+            if (!nodeMap[currentPath]) {
+                const parentNode = nodeMap[parentPath];
+                const newNode: FileTreeNode = {
+                    filename: part,
+                    path: currentPath,
+                    type: 'directory',
+                    children: [],
+                    size: 0,
+                    uploaded_at: '',
+                    content_type: 'directory',
+                };
+                nodeMap[currentPath] = newNode;
+                parentNode.children.push(newNode);
+            }
+        }
     });
-    nodes.forEach(node => sortNodes(node.children));
-  };
 
-  sortNodes(rootNodes);
-  return rootNodes;
+    files.forEach(file => {
+        const parentPath = file.path.substring(0, file.path.lastIndexOf('/'));
+        const parentNode = nodeMap[parentPath] || root;
+        const fileNode: FileTreeNode = {
+            ...file,
+            children: [], 
+            type: 'file',
+        };
+        nodeMap[file.path] = fileNode;
+        parentNode.children.push(fileNode);
+    });
+
+    const sortNodes = (nodes: FileTreeNode[]) => {
+        nodes.sort((a, b) => {
+            if (a.type === b.type) return a.filename.localeCompare(b.filename);
+            return a.type === 'directory' ? -1 : 1;
+        });
+        nodes.forEach(node => sortNodes(node.children));
+    };
+
+    sortNodes(root.children);
+    return root.children;
 }
+
 
 // 2. --- RECURSIVE FILE ITEM COMPONENT ---
 
@@ -135,9 +156,11 @@ const FileItem: React.FC<FileItemProps> = ({ node, onContextMenu, onDrop, defaul
 const Explorer = () => {
   const { currentProject } = useProjectContext();
   const [projectTree, setProjectTree] = useState<FileTreeNode | null>(null);
+  const [treeKey, setTreeKey] = useState(0); // For forcing re-render to collapse all
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; file: FileInfo } | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   const fetchFiles = useCallback(async () => {
     if (!currentProject) {
@@ -173,6 +196,38 @@ const Explorer = () => {
   useEffect(() => {
     fetchFiles();
   }, [fetchFiles]);
+
+  const handleRefresh = () => fetchFiles();
+
+  const handleCollapseAll = () => setTreeKey(prev => prev + 1);
+
+  const handleNewFile = async () => {
+    if (!currentProject) return;
+    const fileName = prompt('Enter new file name:');
+    if (fileName) {
+      try {
+        await createFile(fileName, currentProject.id);
+        fetchFiles();
+      } catch (error) {
+        console.error('Create file failed:', error);
+        alert('Failed to create file.');
+      }
+    }
+  };
+
+  const handleNewFolder = async () => {
+    if (!currentProject) return;
+    const folderName = prompt('Enter new folder name:');
+    if (folderName) {
+      try {
+        await createFolder(folderName, currentProject.id);
+        fetchFiles();
+      } catch (error) {
+        console.error('Create folder failed:', error);
+        alert('Failed to create folder.');
+      }
+    }
+  };
 
   const handleContextMenu = (e: React.MouseEvent, file: FileInfo) => {
     e.preventDefault();
@@ -243,6 +298,9 @@ const Explorer = () => {
   const getContextMenuItems = (file: FileInfo): MenuItem[] => {
     if (file.path === '/') { // Project Root
         return [
+            { label: 'New File', action: handleNewFile, icon: <Icons.FilePlus /> },
+            { label: 'New Folder', action: handleNewFolder, icon: <Icons.FolderPlus /> },
+            { label: '', action: () => {}, separator: true },
             { label: 'Copy Project Name', action: () => navigator.clipboard.writeText(file.filename), icon: <Icons.Copy /> },
             { label: 'Copy Project ID', action: () => {if(currentProject) navigator.clipboard.writeText(currentProject.id)}, icon: <Icons.Copy /> },
         ];
@@ -259,8 +317,24 @@ const Explorer = () => {
 }
 
   return (
-    <div className="p-4 bg-card h-full flex flex-col" onClick={closeContextMenu} onContextMenu={closeContextMenu}>
-      <h2 className="font-bold text-lg mb-4 flex-shrink-0">Explorer</h2>
+    <div 
+        className="p-4 bg-card h-full flex flex-col group" 
+        onClick={closeContextMenu} 
+        onContextMenu={closeContextMenu}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+    >
+        <div className="flex justify-between items-center mb-4">
+            <h2 className="font-bold text-lg flex-shrink-0">Explorer</h2>
+            {isHovered && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <button onClick={handleNewFile} className="hover:text-primary"><Icons.FilePlus className="w-4 h-4" /></button>
+                    <button onClick={handleNewFolder} className="hover:text-primary"><Icons.FolderPlus className="w-4 h-4" /></button>
+                    <button onClick={handleCollapseAll} className="hover:text-primary"><Icons.Collapse className="w-4 h-4" /></button>
+                    <button onClick={handleRefresh} className="hover:text-primary"><Icons.Refresh className="w-4 h-4" /></button>
+                </div>
+            )}
+        </div>
       
       <div className="flex-grow overflow-y-auto">
         {loading && <div className="flex items-center gap-2 text-muted-foreground"><Icons.Loader className="w-4 h-4 animate-spin" /><span>Loading...</span></div>}
@@ -268,6 +342,7 @@ const Explorer = () => {
 
         {!loading && !error && projectTree && (
           <FileItem 
+              key={treeKey}
               node={projectTree} 
               onContextMenu={handleContextMenu} 
               onDrop={handleMove}

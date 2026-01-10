@@ -137,6 +137,33 @@ export const renameItem = async (oldPath: string, newPath: string, projectId: st
 };
 
 /**
+ * Creates a new, empty file.
+ * @param {string} filePath - The relative path of the new file to create.
+ * @param {string | null} projectId - The project context.
+ * @returns {Promise<any>} The result from the API.
+ */
+export const createFile = async (filePath: string, projectId: string | null = null): Promise<any> => {
+    const url = buildUrl('/create-file', projectId);
+    const token = getAuthToken();
+
+    const response = await fetch(url.toString(), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ file_path: filePath }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to create file');
+    }
+
+    return response.json();
+};
+
+/**
  * Creates a new folder.
  * @param {string} folderPath - The relative path of the new folder to create.
  * @param {string | null} projectId - The project context.

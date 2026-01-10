@@ -29,10 +29,14 @@ import {
     X,
     Plus,
     UserMinus,
-    Copy, // Added
-    Edit, // Added
-    Download, // Added
-    Trash, // Added
+    Copy,
+    Edit,
+    Download,
+    Trash,
+    FilePlus, // Ajoutée
+    FolderPlus, // Ajoutée
+    RefreshCw, // Ajoutée
+    FolderUp, // Ajoutée
     type LucideProps
 } from 'lucide-react';
 
@@ -70,4 +74,8 @@ export const Icons = {
     Edit: (props: LucideProps) => <Edit className="icon" {...props} />,
     Download: (props: LucideProps) => <Download className="icon" {...props} />,
     Trash: (props: LucideProps) => <Trash className="icon" {...props} />,
+    FilePlus: (props: LucideProps) => <FilePlus className="icon" {...props} />,
+    FolderPlus: (props: LucideProps) => <FolderPlus className="icon" {...props} />,
+    Refresh: (props: LucideProps) => <RefreshCw className="icon" {...props} />,
+    Collapse: (props: LucideProps) => <FolderUp className="icon" {...props} />,
 };
