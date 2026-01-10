@@ -135,7 +135,7 @@ const FileItem: React.FC<FileItemProps> = ({ node, onContextMenu, onDrop, defaul
           <div className="w-4"></div>
         )}
         {isFolder ? <Icons.Folder className={`w-4 h-4 ${isRoot ? 'text-primary': ''}`} /> : <Icons.File className="w-4 h-4" />}
-        <span>{node.filename}</span>
+        <span className="truncate">{node.filename}</span>
       </div>
 
       {isFolder && isOpen && (
@@ -324,14 +324,14 @@ const Explorer = () => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
     >
-        <div className="flex justify-between items-center mb-4">
-            <h2 className="font-bold text-lg flex-shrink-0">Explorer</h2>
+        <div className="flex justify-between items-center gap-4 mb-4">
+            <h2 className="font-bold text-lg truncate">Explorer</h2>
             {isHovered && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                    <button onClick={handleNewFile} className="hover:text-primary"><Icons.FilePlus className="w-4 h-4" /></button>
-                    <button onClick={handleNewFolder} className="hover:text-primary"><Icons.FolderPlus className="w-4 h-4" /></button>
-                    <button onClick={handleCollapseAll} className="hover:text-primary"><Icons.Collapse className="w-4 h-4" /></button>
-                    <button onClick={handleRefresh} className="hover:text-primary"><Icons.Refresh className="w-4 h-4" /></button>
+                <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
+                    <button onClick={handleNewFile} title="New File" className="hover:text-primary"><Icons.FilePlus className="w-4 h-4" /></button>
+                    <button onClick={handleNewFolder} title="New Folder" className="hover:text-primary"><Icons.FolderPlus className="w-4 h-4" /></button>
+                    <button onClick={handleCollapseAll} title="Collapse All" className="hover:text-primary"><Icons.Collapse className="w-4 h-4" /></button>
+                    <button onClick={handleRefresh} title="Refresh Explorer" className="hover:text-primary"><Icons.Refresh className="w-4 h-4" /></button>
                 </div>
             )}
         </div>
