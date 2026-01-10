@@ -16,27 +16,24 @@ interface FileTreeNode extends FileInfo {
 function buildFileTree(files: FileInfo[]): FileTreeNode[] {
   const fileMap: { [path: string]: FileTreeNode } = {};
 
-  // Initialize all items as nodes, defaulting to type 'file'
   files.forEach(file => {
     fileMap[file.path] = { ...file, children: [], type: 'file' };
   });
 
   const rootNodes: FileTreeNode[] = [];
 
-  // Build the tree and update types to 'directory' where appropriate
   Object.values(fileMap).forEach(node => {
     const parentPath = node.path.substring(0, node.path.lastIndexOf('/'));
     
     if (parentPath && fileMap[parentPath]) {
       const parent = fileMap[parentPath];
-      parent.type = 'directory'; // Any node with children is a directory
+      parent.type = 'directory'; 
       parent.children.push(node);
     } else {
       rootNodes.push(node);
     }
   });
 
-  // Sort files and folders alphabetically
   const sortNodes = (nodes: FileTreeNode[]) => {
     nodes.sort((a, b) => {
         if (a.type === b.type) return a.filename.localeCompare(b.filename);
@@ -105,7 +102,7 @@ const FileItem: React.FC<FileItemProps> = ({ node, onContextMenu, onDrop, defaul
       className={`rounded-sm ${isBeingDraggedOver ? 'bg-primary/20' : ''}`}
     >
       <div
-        className={`flex items-center gap-1.5 text-sm py-1 px-2 rounded hover:bg-primary/10 cursor-pointer ${isRoot ? 'font-bold' : ''}`}
+        className={`flex items-center gap-1.5 text-xs py-1 px-2 rounded hover:bg-primary/10 cursor-pointer ${isRoot ? 'font-bold' : ''}`}
         onClick={handleToggle}
         onContextMenu={(e) => onContextMenu(e, node)}
         draggable
@@ -262,23 +259,25 @@ const Explorer = () => {
 }
 
   return (
-    <div className="p-4 bg-card h-full" onClick={closeContextMenu} onContextMenu={closeContextMenu}>
-      <h2 className="font-bold text-lg mb-4">Explorer</h2>
+    <div className="p-4 bg-card h-full flex flex-col" onClick={closeContextMenu} onContextMenu={closeContextMenu}>
+      <h2 className="font-bold text-lg mb-4 flex-shrink-0">Explorer</h2>
       
-      {loading && <div className="flex items-center gap-2 text-muted-foreground"><Icons.Loader className="w-4 h-4 animate-spin" /><span>Loading...</span></div>}
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      <div className="flex-grow overflow-y-auto">
+        {loading && <div className="flex items-center gap-2 text-muted-foreground"><Icons.Loader className="w-4 h-4 animate-spin" /><span>Loading...</span></div>}
+        {error && <p className="text-sm text-red-500">{error}</p>}
 
-      {!loading && !error && projectTree && (
-        <FileItem 
-            node={projectTree} 
-            onContextMenu={handleContextMenu} 
-            onDrop={handleMove}
-            defaultOpen={true}
-            isRoot={true}
-        />
-      )}
-      
-      {!loading && !error && !projectTree && <p className="text-sm text-muted-foreground">No project selected.</p>}
+        {!loading && !error && projectTree && (
+          <FileItem 
+              node={projectTree} 
+              onContextMenu={handleContextMenu} 
+              onDrop={handleMove}
+              defaultOpen={true}
+              isRoot={true}
+          />
+        )}
+        
+        {!loading && !error && !projectTree && <p className="text-sm text-muted-foreground">No project selected.</p>}
+      </div>
 
       {contextMenu && (
         <ContextMenu 
