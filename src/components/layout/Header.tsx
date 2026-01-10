@@ -3,6 +3,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useAuthContext } from '../../context/AuthContext';
 import { Icons } from '../icons';
 import Account from '../common/Account';
+import { ProjectSwitcher } from '../common/ProjectSwitcher';
 
 interface HeaderProps {
   theme: string;
@@ -27,10 +28,7 @@ const Header = ({ theme, toggleTheme }: HeaderProps) => {
     <header className="flex items-center justify-between h-14 px-4 border-b bg-card">
       <div className="flex items-center space-x-4">
         <h1 className="text-lg font-bold">Solufuse</h1>
-        <div className="flex items-center space-x-2">
-            <div className="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-md">PROJET-ACTUEL</div>
-            <button className="btn-secondary p-2 rounded-full"><Icons.ChevronDown size={16} /></button>
-        </div>
+        <ProjectSwitcher />
       </div>
 
       {user && (

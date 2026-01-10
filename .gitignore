@@ -1,1 +1,3 @@
-node_modules
+
+# Ignorer le dossier backend
+backend/
