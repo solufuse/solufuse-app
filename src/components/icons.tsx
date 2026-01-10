@@ -29,6 +29,10 @@ import {
     X,
     Plus,
     UserMinus,
+    Copy, // Added
+    Edit, // Added
+    Download, // Added
+    Trash, // Added
     type LucideProps
 } from 'lucide-react';
 
@@ -61,5 +65,9 @@ export const Icons = {
     LogIn: (props: LucideProps) => <LogIn className="icon" {...props} />,
     X: (props: LucideProps) => <X className="icon" {...props} />,
     Plus: (props: LucideProps) => <Plus className="icon" {...props} />,
-    UserMinus: (props: LucideProps) => <UserMinus className="icon" {...props} />
+    UserMinus: (props: LucideProps) => <UserMinus className="icon" {...props} />,
+    Copy: (props: LucideProps) => <Copy className="icon" {...props} />,
+    Edit: (props: LucideProps) => <Edit className="icon" {...props} />,
+    Download: (props: LucideProps) => <Download className="icon" {...props} />,
+    Trash: (props: LucideProps) => <Trash className="icon" {...props} />,
 };
