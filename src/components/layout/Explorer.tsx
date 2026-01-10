@@ -95,7 +95,6 @@ const FileItem: React.FC<FileItemProps> = ({ node, onContextMenu, onDrop, defaul
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Check if the dragged item is internal (our JSON format)
     if (e.dataTransfer.types.includes('application/json') && isFolder) {
         setIsBeingDraggedOver(true);
     }
@@ -112,7 +111,6 @@ const FileItem: React.FC<FileItemProps> = ({ node, onContextMenu, onDrop, defaul
     setIsBeingDraggedOver(false);
     if (!isFolder) return;
 
-    // Check if the dropped item is internal
     if (e.dataTransfer.types.includes('application/json')) {
         const draggedNode = JSON.parse(e.dataTransfer.getData('application/json')) as FileInfo;
         if(draggedNode.path !== node.path) {
@@ -208,7 +206,6 @@ const Explorer = () => {
     fetchFiles();
   }, [fetchFiles]);
 
-  // --- Action Handlers ---
   const handleRefresh = () => fetchFiles();
   const handleCollapseAll = () => setTreeKey(prev => prev + 1);
 
@@ -240,7 +237,6 @@ const Explorer = () => {
     }
   };
 
-  // --- Context Menu Handlers ---
   const handleContextMenu = (e: React.MouseEvent, file: FileInfo) => {
     e.preventDefault();
     e.stopPropagation();
@@ -248,7 +244,6 @@ const Explorer = () => {
   };
   const closeContextMenu = () => setContextMenu(null);
 
-  // --- Drag and Drop Handlers ---
   const handleInternalMove = async (targetFolder: FileInfo, draggedItem: FileInfo) => {
     if (!currentProject) return;
     const isTargetRoot = targetFolder.path === '/';
@@ -260,6 +255,42 @@ const Explorer = () => {
     } catch (error) {
       console.error('Move failed:', error);
       alert('Failed to move item.');
+    }
+  };
+  
+  const handleRename = async (file: FileInfo) => {
+    const newName = prompt('Enter new name:', file.filename);
+    if (newName && newName !== file.filename && currentProject) {
+      const newPath = file.path.substring(0, file.path.lastIndexOf('/') + 1) + newName;
+      try {
+        await renameItem(file.path, newPath, currentProject.id);
+        fetchFiles();
+      } catch (error) {
+        console.error('Rename failed:', error);
+        alert('Failed to rename file.');
+      }
+    }
+  };
+
+  const handleDelete = async (file: FileInfo) => {
+    if (window.confirm(`Are you sure you want to delete ${file.filename}?`) && currentProject) {
+      try {
+        await deleteItems([file.path], currentProject.id);
+        fetchFiles();
+      } catch (error) {
+        console.error('Delete failed:', error);
+        alert('Failed to delete item.');
+      }
+    }
+  };
+
+  const handleDownload = async (file: FileInfo) => {
+    if (!currentProject) return;
+    try {
+        await downloadItems([file.path], currentProject.id);
+    } catch (error) {
+        console.error('Download failed:', error);
+        alert('Failed to download item.');
     }
   };
 
@@ -296,16 +327,32 @@ const Explorer = () => {
     setIsDraggingFile(false);
   };
 
-  // --- Menu Item Definitions ---
   const getContextMenuItems = (file: FileInfo): MenuItem[] => {
-    // ... (rest of the function is unchanged) ...
+    if (file.path === '/') { // Project Root
+        return [
+            { label: 'New File', action: handleNewFile, icon: <Icons.FilePlus /> },
+            { label: 'New Folder', action: handleNewFolder, icon: <Icons.FolderPlus /> },
+            { label: '', action: () => {}, separator: true },
+            { label: 'Copy Project Name', action: () => navigator.clipboard.writeText(file.filename), icon: <Icons.Copy /> },
+            { label: 'Copy Project ID', action: () => {if(currentProject) navigator.clipboard.writeText(currentProject.id)}, icon: <Icons.Copy /> },
+        ];
+    }
+    return [
+        { label: 'Copy Filename', action: () => navigator.clipboard.writeText(file.filename), icon: <Icons.Copy /> },
+        { label: 'Copy Path', action: () => navigator.clipboard.writeText(file.path), icon: <Icons.Copy /> },
+        { label: '', action: () => {}, separator: true },
+        { label: 'Rename', action: () => handleRename(file), icon: <Icons.Edit /> },
+        { label: 'Download', action: () => handleDownload(file), icon: <Icons.Download /> },
+        { label: '', action: () => {}, separator: true },
+        { label: 'Delete', action: () => handleDelete(file), icon: <Icons.Trash />, danger: true },
+    ];
   }
 
   return (
     <div 
         className={`p-4 bg-card h-full flex flex-col group transition-all duration-200 ${isDraggingFile ? 'border-2 border-dashed border-primary/50' : 'border-2 border-transparent'}`}
         onClick={closeContextMenu} 
-        onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e, projectTree!); }}
+        onContextMenu={(e) => { e.preventDefault(); if(projectTree) handleContextMenu(e, projectTree); }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onDragOver={handleDragOver}
