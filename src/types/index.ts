@@ -21,9 +21,10 @@ export interface Project {
 export interface Member {
     uid: string;
     email: string;
-    role: 'admin' | 'editor' | 'viewer';
+    role: 'owner' | 'admin' | 'editor' | 'viewer' | 'moderator';
     photoURL?: string;
     username?: string; // Added from the old types.ts
+    global_role?: string;
 }
 
 // Types from the old types.ts

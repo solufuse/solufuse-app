@@ -127,7 +127,7 @@ const MembersModal = ({ projectId, currentUserUID, onClose, notify }: MembersMod
                                     <div className="flex flex-col min-w-0 flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="text-label font-bold text-foreground truncate" title={m.uid}>{m.email || "Guest User"}</span>
-                                            {['admin', 'moderator', 'nitro'].includes(m.global_role) && (
+                                            {m.global_role && ['admin', 'moderator', 'nitro'].includes(m.global_role) && (
                                                 <span className="text-[8px] text-purple-600 font-bold bg-purple-50 px-1 rounded border border-purple-100">{m.global_role.toUpperCase()}</span>
                                             )}
                                         </div>
