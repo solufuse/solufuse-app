@@ -27,6 +27,8 @@ import {
     ChevronDown,
     LogIn,
     X,
+    Plus,
+    UserMinus,
     type LucideProps
 } from 'lucide-react';
 
@@ -57,5 +59,7 @@ export const Icons = {
     User: (props: LucideProps) => <User className="icon" {...props} />,
     ChevronDown: (props: LucideProps) => <ChevronDown className="icon" {...props} />,
     LogIn: (props: LucideProps) => <LogIn className="icon" {...props} />,
-    X: (props: LucideProps) => <X className="icon" {...props} />
+    X: (props: LucideProps) => <X className="icon" {...props} />,
+    Plus: (props: LucideProps) => <Plus className="icon" {...props} />,
+    UserMinus: (props: LucideProps) => <UserMinus className="icon" {...props} />
 };

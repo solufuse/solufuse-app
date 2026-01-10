@@ -1,84 +1,188 @@
 
 import { useState, useEffect } from 'react';
 import { Icons } from '../icons';
-import { inviteMember, removeMember, getProjectMembers } from '../../api/projects'; // Import API functions
-import { Member } from '../../types'; // Import types
+import { getProjectMembers, inviteMember, inviteMemberWithUid, removeMember, updateMemberRole } from '../../api/projects';
+import { Member } from '../../types';
 
 interface MembersModalProps {
     projectId: string;
+    currentUserUID: string;
     onClose: () => void;
+    notify: (msg: string, type?: 'success' | 'error') => void;
 }
 
-export function MembersModal({ projectId, onClose }: MembersModalProps) {
+const MembersModal = ({ projectId, currentUserUID, onClose, notify }: MembersModalProps) => {
     const [members, setMembers] = useState<Member[]>([]);
+    const [inviteInput, setInviteInput] = useState("");
+    const [selectedRole, setSelectedRole] = useState("viewer");
+    const [loading, setLoading] = useState(false);
+    const [updatingUid, setUpdatingUid] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchMembers = async () => {
-            if (projectId) {
-                try {
-                    const memberList = await getProjectMembers(projectId);
-                    setMembers(memberList);
-                } catch (error) {
-                    console.error('Error fetching members:', error);
-                }
-            }
-        };
-        fetchMembers();
-    }, [projectId]);
+    const loadMembers = async () => {
+        setLoading(true);
+        try {
+            const memberList = await getProjectMembers(projectId);
+            setMembers(memberList);
+        } catch (e: any) { 
+            notify(e.message || "Failed to load members", "error"); 
+        } 
+        finally { setLoading(false); }
+    };
 
-    const handleInviteMember = async (email: string) => {
-        if (projectId) {
-            try {
-                const newMember = await inviteMember(projectId, email, 'viewer');
-                setMembers([...members, newMember]);
-            } catch (error) {
-                console.error('Error inviting member:', error);
+    const handleInvite = async () => {
+        if (!inviteInput) return;
+        try {
+            const isEmail = inviteInput.includes("@");
+            if (isEmail) {
+                await inviteMember(projectId, inviteInput, selectedRole);
+            } else {
+                await inviteMemberWithUid(projectId, inviteInput, selectedRole);
             }
+            notify("Member invited!");
+            setInviteInput("");
+            loadMembers();
+        } catch (e: any) { 
+            notify(e.message || "Invite failed", "error"); 
         }
     };
 
-    const handleRemoveMember = async (userId: string) => {
-        if (projectId) {
-            try {
-                await removeMember(projectId, userId);
-                setMembers(members.filter((m) => m.uid !== userId));
-            } catch (error) {
-                console.error('Error removing member:', error);
-            }
+    const handleRoleChange = async (uid: string, newRole: string) => {
+        setUpdatingUid(uid);
+        try {
+            await updateMemberRole(projectId, uid, newRole);
+            notify(`Role updated to ${newRole.toUpperCase()}`);
+            loadMembers(); // Refresh list to confirm
+        } catch (e: any) { 
+            notify(e.message || "Update failed", "error"); 
+        } finally {
+            setUpdatingUid(null);
         }
     };
+
+    const handleKick = async (uid: string) => {
+        if (!confirm("Kick this user?")) return;
+        try {
+            await removeMember(projectId, uid);
+            notify("User kicked");
+            loadMembers();
+        } catch (e: any) { 
+            notify(e.message || "Kick failed", "error"); 
+        }
+    };
+
+    useEffect(() => { loadMembers(); }, [projectId]);
 
     return (
-        <div className="absolute top-full mt-2 w-72 bg-card border rounded-lg shadow-lg z-10">
-            <div className="p-2 flex justify-between items-center">
-                <h3 className="font-bold">Project Members</h3>
-                <button onClick={onClose} className="p-1 hover:bg-slate-200 rounded text-slate-500"><Icons.X className="w-4 h-4"/></button>
-            </div>
-            <div className="border-t">
-                <ul>
-                    {members.map(m => (
-                        <li key={m.uid} className="px-3 py-2 flex justify-between items-center">
-                            <span>{m.email} ({m.role})</span>
-                            <button onClick={() => handleRemoveMember(m.uid)} className="text-red-500">
-                                <Icons.X size={16} />
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-            <div className="border-t p-2">
-                <input
-                    type="text"
-                    placeholder="Invite member by email..."
-                    className="w-full px-2 py-1 border rounded-md mb-2"
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            handleInviteMember(e.currentTarget.value);
-                            e.currentTarget.value = '';
-                        }
-                    }}
-                />
+        <div className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm flex items-center justify-center">
+            <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-96 overflow-hidden flex flex-col max-h-[500px]">
+                {/* Header */}
+                <div className="p-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <h3 className="font-bold text-slate-700 flex items-center gap-2">
+                        <Icons.Users className="w-4 h-4 text-blue-500" /> Project Members
+                    </h3>
+                    <button onClick={onClose} className="p-1 hover:bg-slate-200 rounded text-slate-500"><Icons.X className="w-4 h-4"/></button>
+                </div>
+                
+                {/* Invite Bar */}
+                <div className="p-3 border-b border-slate-100 flex flex-col gap-2 bg-white">
+                    <div className="flex gap-2">
+                        <input 
+                            className="flex-1 text-[10px] p-2 border border-slate-200 rounded focus:outline-none focus:border-blue-500"
+                            placeholder="Email or UID..."
+                            value={inviteInput}
+                            onChange={(e) => setInviteInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+                        />
+                        <div className="relative">
+                            <select 
+                                value={selectedRole}
+                                onChange={(e) => setSelectedRole(e.target.value)}
+                                className="appearance-none bg-slate-50 border border-slate-200 text-slate-600 text-[10px] font-bold py-2 pl-2 pr-6 rounded focus:outline-none focus:border-blue-500 h-full uppercase cursor-pointer"
+                            >
+                                <option value="viewer">Viewer</option>
+                                <option value="editor">Editor</option>
+                                <option value="moderator">Mod</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            <Icons.ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
+                    </div>
+                    <button onClick={handleInvite} className="w-full bg-blue-600 text-white py-1.5 rounded font-bold text-[10px] hover:bg-blue-700 transition-colors flex justify-center items-center gap-1">
+                        <Icons.Plus className="w-3 h-3" /> ADD NEW MEMBER
+                    </button>
+                </div>
+
+                {/* Member List */}
+                <div className="flex-1 overflow-y-auto p-2 space-y-1 bg-slate-50/30">
+                    {loading ? <div className="text-center p-4 text-slate-400 text-xs flex items-center justify-center gap-2"><Icons.Loader className="w-3 h-3 animate-spin"/> Loading...</div> : members.map(m => {
+                        // Check if I can edit this user (Simple UI check, Backend enforces security)
+                        const canEdit = m.uid !== currentUserUID && m.role !== 'owner';
+                        const isUpdating = updatingUid === m.uid;
+
+                        return (
+                            <div key={m.uid} className="flex justify-between items-center p-2 rounded hover:bg-white border border-transparent hover:border-slate-200 hover:shadow-sm group transition-all">
+                                <div className="flex items-center gap-2 overflow-hidden flex-1">
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold border shrink-0 ${m.role === 'owner' ? 'bg-yellow-50 text-yellow-600 border-yellow-200' : 'bg-white text-slate-500 border-slate-200'}`}>
+                                        {m.role === 'owner' ? '👑' : '👤'}
+                                    </div>
+                                    <div className="flex flex-col min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-slate-700 truncate" title={m.uid}>{m.email || "Guest User"}</span>
+                                            {/* Global Badge */}
+                                            {['admin', 'moderator', 'nitro'].includes(m.global_role) && (
+                                                <span className="text-[8px] text-purple-600 font-bold bg-purple-50 px-1 rounded border border-purple-100">{m.global_role.toUpperCase()}</span>
+                                            )}
+                                        </div>
+                                        
+                                        {/* ROLE SELECTOR (INLINE) */}
+                                        <div className="mt-0.5">
+                                            {canEdit ? (
+                                                <div className="relative inline-block">
+                                                    <select 
+                                                        value={m.role}
+                                                        disabled={isUpdating}
+                                                        onChange={(e) => handleRoleChange(m.uid, e.target.value)}
+                                                        className={`appearance-none text-[9px] font-bold uppercase py-0.5 pl-1.5 pr-4 rounded border cursor-pointer focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all ${
+                                                            isUpdating ? 'opacity-50' : ''
+                                                        } ${
+                                                            m.role === 'admin' ? 'bg-red-50 text-red-600 border-red-100' :
+                                                            m.role === 'moderator' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                                            m.role === 'editor' ? 'bg-green-50 text-green-600 border-green-100' :
+                                                            'bg-slate-100 text-slate-500 border-slate-200'
+                                                        }`}
+                                                    >
+                                                        <option value="viewer">Viewer</option>
+                                                        <option value="editor">Editor</option>
+                                                        <option value="moderator">Mod</option>
+                                                        <option value="admin">Admin</option>
+                                                    </select>
+                                                    <Icons.ChevronDown className="w-2.5 h-2.5 text-current opacity-50 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                                </div>
+                                            ) : (
+                                                <span className={`text-[8px] uppercase px-1.5 py-0.5 rounded font-bold inline-block border ${
+                                                    m.role === 'owner' ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 
+                                                    'bg-slate-100 text-slate-400 border-slate-200'
+                                                }`}>
+                                                    {m.role}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Kick Button */}
+                                {canEdit && (
+                                    <button onClick={() => handleKick(m.uid)} className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-all ml-2" title="Kick Member">
+                                        <Icons.UserMinus className="w-3.5 h-3.5" />
+                                    </button>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
-}
+};
+
+export default MembersModal; // Make sure to export the component as default

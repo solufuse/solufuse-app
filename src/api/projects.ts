@@ -1,3 +1,4 @@
+
 import { Project, Member } from '../types';
 
 const API_URL = 'https://api.solufuse.com'; // Replace with your API URL
@@ -46,27 +47,47 @@ export const getProjectMembers = async (projectId: string): Promise<Member[]> =>
     },
   });
   if (!response.ok) {
-    throw new Error('Failed to fetch project members');
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to fetch project members');
   }
   return response.json();
 };
 
 export const inviteMember = async (projectId: string, email: string, role: string): Promise<Member> => {
-  const token = getAuthToken();
-  const response = await fetch(`${API_URL}/projects/${projectId}/members`,
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({ email, role }),
-  });
-  if (!response.ok) {
-    throw new Error('Failed to invite member');
-  }
-  return response.json();
-};
+    const token = getAuthToken();
+    const response = await fetch(`${API_URL}/projects/${projectId}/members`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ email, role }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to invite member');
+    }
+    return response.json();
+  };
+
+  export const inviteMemberWithUid = async (projectId: string, userId: string, role: string): Promise<Member> => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_URL}/projects/${projectId}/members`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ user_id: userId, role }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+      throw new Error(error.detail || 'Failed to invite member');
+    }
+    return response.json();
+  };
 
 export const removeMember = async (projectId: string, userId: string): Promise<void> => {
   const token = getAuthToken();
@@ -78,6 +99,24 @@ export const removeMember = async (projectId: string, userId: string): Promise<v
     },
   });
   if (!response.ok) {
-    throw new Error('Failed to remove member');
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to remove member');
   }
+};
+
+export const updateMemberRole = async (projectId: string, userId: string, role: string): Promise<void> => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_URL}/projects/${projectId}/members`,
+    {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ user_id: userId, role }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to update member role');
+    }
 };

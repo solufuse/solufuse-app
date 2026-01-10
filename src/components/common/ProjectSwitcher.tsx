@@ -3,14 +3,23 @@ import { useState, useEffect } from 'react';
 import { Icons } from '../icons';
 import { listProjects, createProject } from '../../api/projects'; // Import API functions
 import { Project } from '../../types'; // Import types
-import { MembersModal } from './MembersModal';
+import MembersModal from './MembersModal'; // Import the new MembersModal
+import { useAuthContext } from '../../context/AuthContext'; // Import the Auth Context hook
 
 export function ProjectSwitcher() {
+  const { user } = useAuthContext(); // Get the current user from the context
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [search, setSearch] = useState('');
   const [showMembers, setShowMembers] = useState(false);
+
+  // A simple notify function. You can replace this with a more robust solution.
+  const notify = (msg: string, type: 'success' | 'error' = 'success') => {
+    console.log(`[${type}] ${msg}`);
+    // In a real app, you might use a library like react-toastify
+    // toast(msg, { type });
+  };
 
   useEffect(() => {
     // Fetch projects when the component mounts
@@ -23,6 +32,7 @@ export function ProjectSwitcher() {
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
+        notify('Failed to fetch projects', 'error');
       }
     };
     fetchProjects();
@@ -36,8 +46,10 @@ export function ProjectSwitcher() {
         setCurrentProject(newProject);
         setSearch('');
         setIsOpen(false);
+        notify(`Project "${newProject.name}" created successfully!`);
       } catch (error) {
         console.error('Error creating project:', error);
+        notify('Failed to create project', 'error');
       }
     }
   };
@@ -78,10 +90,14 @@ export function ProjectSwitcher() {
               ))}
             </ul>
           </div>
-          <div className="border-t p-2">
-            <button onClick={handleCreateProject} className="w-full btn-primary text-sm">Create Project</button>
-          </div>
-          {currentProject && (
+          {/* Only show create project if user is logged in */}
+          {user && (
+            <div className="border-t p-2">
+                <button onClick={handleCreateProject} className="w-full btn-primary text-sm">Create Project</button>
+            </div>
+          )}
+          {/* Only show manage members if there is a project and a user */}
+          {currentProject && user && (
             <div className="border-t p-2">
               <button onClick={() => setShowMembers(true)} className="w-full btn-secondary text-sm">Manage Members</button>
             </div>
@@ -89,8 +105,14 @@ export function ProjectSwitcher() {
         </div>
       )}
 
-      {showMembers && currentProject && (
-        <MembersModal projectId={currentProject.id} onClose={() => setShowMembers(false)} />
+      {/* Only render modal if we have the required props */}
+      {showMembers && currentProject && user && (
+        <MembersModal 
+          projectId={currentProject.id} 
+          currentUserUID={user.uid} // Pass the dynamic user UID
+          onClose={() => setShowMembers(false)} 
+          notify={notify} 
+        />
       )}
     </div>
   );
