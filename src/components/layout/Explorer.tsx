@@ -130,11 +130,15 @@ const FileItem: React.FC<FileItemProps> = ({ node, onContextMenu, onDrop, defaul
         onDragStart={handleDragStart}
       >
         {isFolder ? (
-          <Icons.ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-0' : '-rotate-90'}`} />
+          <Icons.ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform ${isOpen ? 'rotate-0' : '-rotate-90'}`} />
         ) : (
-          <div className="w-4"></div>
+          <div className="w-4 flex-shrink-0"></div>
         )}
-        {isFolder ? <Icons.Folder className={`w-4 h-4 ${isRoot ? 'text-primary': ''}`} /> : <Icons.File className="w-4 h-4" />}
+        {isFolder ? (
+          <Icons.Folder className={`w-4 h-4 flex-shrink-0 ${isRoot ? 'text-primary': ''}`} />
+        ) : (
+          <Icons.File className="w-4 h-4 flex-shrink-0" />
+        )}
         <span className="truncate">{node.filename}</span>
       </div>
 
@@ -328,10 +332,10 @@ const Explorer = () => {
             <h2 className="font-bold text-lg truncate">Explorer</h2>
             {isHovered && (
                 <div className="flex items-center gap-2 text-muted-foreground flex-shrink-0">
-                    <button onClick={handleNewFile} title="New File" className="hover:text-primary"><Icons.FilePlus className="w-4 h-4" /></button>
-                    <button onClick={handleNewFolder} title="New Folder" className="hover:text-primary"><Icons.FolderPlus className="w-4 h-4" /></button>
-                    <button onClick={handleCollapseAll} title="Collapse All" className="hover:text-primary"><Icons.Collapse className="w-4 h-4" /></button>
-                    <button onClick={handleRefresh} title="Refresh Explorer" className="hover:text-primary"><Icons.Refresh className="w-4 h-4" /></button>
+                    <button onClick={handleNewFile} title="New File" className="hover:text-primary"><Icons.FilePlus className="w-4 h-4 flex-shrink-0" /></button>
+                    <button onClick={handleNewFolder} title="New Folder" className="hover:text-primary"><Icons.FolderPlus className="w-4 h-4 flex-shrink-0" /></button>
+                    <button onClick={handleCollapseAll} title="Collapse All" className="hover:text-primary"><Icons.Collapse className="w-4 h-4 flex-shrink-0" /></button>
+                    <button onClick={handleRefresh} title="Refresh Explorer" className="hover:text-primary"><Icons.Refresh className="w-4 h-4 flex-shrink-0" /></button>
                 </div>
             )}
         </div>
